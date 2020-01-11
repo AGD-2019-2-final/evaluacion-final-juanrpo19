@@ -40,3 +40,17 @@ u = LOAD 'data.csv' USING PigStorage(',')
 --
 -- >>> Escriba su respuesta a partir de este punto <<<
 --
+
+--datos = FOREACH u GENERATE ToDate(birthday,'M/dd/yyyy') as (mes:DateTime);
+
+datos = foreach u generate ToDate(birthday,'yyyy-MM-dd') as fecha;
+datos2 = foreach datos generate GetMonth(fecha) as fecha;
+
+datos3 = foreach datos2 generate ToString(fecha,'yyyy-MM-dd') as fecha;
+
+
+mes = foreach datos generate ToDate(fecha,'MMM');
+
+filtro = FOREACH datos GENERATE anio_largo,anio_corto;
+
+store filtro into 'output' USING PigStorage(',');
