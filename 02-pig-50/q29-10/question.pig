@@ -41,16 +41,26 @@ u = LOAD 'data.csv' USING PigStorage(',')
 -- >>> Escriba su respuesta a partir de este punto <<<
 --
 
---datos = FOREACH u GENERATE ToDate(birthday,'M/dd/yyyy') as (mes:DateTime);
+datos = FOREACH u GENERATE birthday as fecha, SUBSTRING(birthday,5,7) as mes_largo,(int) SUBSTRING(birthday,5,7) as mes_corto;
 
-datos = foreach u generate ToDate(birthday,'yyyy-MM-dd') as fecha;
-datos2 = foreach datos generate GetMonth(fecha) as fecha;
+datos_final = foreach datos generate fecha,
+				case mes_largo
+				when '01'  then 'ene'
+				when '02'  then 'feb'
+				when '03'  then 'mar'
+				when '04'  then 'abr'
+				when '05'  then 'may'
+				when '06'  then 'jun'
+				when '07'  then 'jul'
+				when '08'  then 'ago'
+				when '09'  then 'sep'
+				when '10'  then 'oct'
+				when '11'  then 'nov'
+				when '12'  then 'dic'
+				end as nom_mes,
+				mes_largo,
+				mes_corto;
 
-datos3 = foreach datos2 generate ToString(fecha,'yyyy-MM-dd') as fecha;
 
 
-mes = foreach datos generate ToDate(fecha,'MMM');
-
-filtro = FOREACH datos GENERATE anio_largo,anio_corto;
-
-store filtro into 'output' USING PigStorage(',');
+store datos_final into 'output' USING PigStorage(',');
